@@ -427,19 +427,6 @@ impl SlideApp {
                     Err(e) => self.set_status(e.to_string()),
                 }
             }
-        } else if let Some(write) = self.services.write.as_mut()
-            && let Some(d) = self.session.active()
-        {
-            // A web save must report errors before advancing the saved revision. The
-            // fire-and-forget download callback below is also used for plain exports.
-            let result = deckcraft_engine::cmd::file::save_bytes(&d.doc, ext)
-                .map_err(|e| e.to_string())
-                .and_then(|bytes| write(&suggested, &bytes))
-                .and_then(|()| deckcraft_engine::cmd::file::mark_saved(&mut self.session, None).map_err(|e| e.to_string()));
-            match result {
-                Ok(()) => self.set_status(format!("Saved {suggested}")),
-                Err(e) => self.set_status(e),
-            }
         } else if let Some(dl) = self.services.download.as_mut()
             && let Some(d) = self.session.active()
         {
@@ -952,52 +939,5 @@ mod tests {
         let mut app = SlideApp::new(Session::new(), Services::default());
         app.run("app.home", json!({})).unwrap();
         assert!(!app.home_open() && app.home.is_none(), "with nothing open the start screen shows anyway");
-    }
-
-    #[test]
-    fn browser_save_marks_only_the_downloaded_presentation_clean() {
-        let written = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
-        let capture = written.clone();
-        let services = Services {
-            write: Some(Box::new(move |name, bytes| {
-                capture.lock().unwrap().push((name.to_string(), bytes.to_vec()));
-                Ok(())
-            })),
-            ..Default::default()
-        };
-        let mut app = SlideApp::new(Session::with_new(), services);
-        app.run("slide.new", json!({"title": "First unsaved deck"})).unwrap();
-        app.run("file.new", json!({})).unwrap();
-        app.run("slide.new", json!({"title": "Downloaded deck"})).unwrap();
-        assert!(app.session.active().unwrap().is_dirty());
-
-        app.save();
-
-        assert!(app.session.documents()[0].is_dirty(), "saving one deck must not hide changes in another");
-        assert!(!app.session.active().unwrap().is_dirty());
-        assert!(app.session.active().unwrap().path.is_none(), "a download is not a local filesystem path");
-        let files = written.lock().unwrap();
-        assert_eq!(files.len(), 1);
-        assert!(files[0].0.ends_with(".deckcraft"));
-        assert!(files[0].1.starts_with(b"PK"), "the host receives the serialized deck");
-        drop(files);
-
-        app.run("slide.new", json!({"title": "Later edit"})).unwrap();
-        assert!(app.session.active().unwrap().is_dirty(), "later edits must restore the leave guard");
-    }
-
-    #[test]
-    fn failed_browser_save_preserves_unsaved_changes() {
-        let services = Services { write: Some(Box::new(|_, _| Err("Download failed".into()))), ..Default::default() };
-        let mut app = SlideApp::new(Session::with_new(), services);
-        app.run("slide.new", json!({"title": "Keep me"})).unwrap();
-        let saved = app.session.active().unwrap().saved_doc.clone();
-
-        app.save();
-
-        let doc = app.session.active().unwrap();
-        assert!(doc.is_dirty());
-        assert!(std::sync::Arc::ptr_eq(&saved, &doc.saved_doc));
-        assert_eq!(app.status.as_ref().unwrap().0, "Download failed");
     }
 }
