@@ -153,7 +153,9 @@ pub fn format_for_path(path: &str) -> &'static str {
     }
 }
 
-fn mark_saved(s: &mut Session, path: Option<String>) -> Result<()> {
+/// Record a successful save after the file writer or synchronous browser host accepts the bytes.
+/// Browser downloads have no filesystem path; passing `None` preserves that distinction.
+pub fn mark_saved(s: &mut Session, path: Option<String>) -> Result<()> {
     let st = s.doc_mut()?;
     st.saved_doc = st.doc.clone();
     if path.is_some() {

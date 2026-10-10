@@ -52,3 +52,9 @@ families excluded by `crates/fonts/build.rs`:
 | BIZ UDPGothic, BIZ UDMincho, Shippori Mincho, Noto Sans Arabic | OFL-1.1 | Japanese and Arabic text |
 
 Web (wasm32) builds embed only Inter Regular/Bold and BIZ UDPGothic Regular.
+
+### Shared Sovereign Cloud
+
+| Asset | Author | Source | License |
+|---|---|---|---|
+| `vendor/sovereign-cloud-ui/assets/icp/logo.svg` | DFINITY Foundation | [DFINITY documentation favicon](https://github.com/dfinity/developer-docs/blob/2e48927666fb50d15a5c874aca4b64f50e584708/public/favicon.svg), viewBox cropped to the infinity mark | Apache-2.0; license and provenance included beside the asset |

@@ -47,6 +47,20 @@ pub fn title_bar(app: &mut SlideApp, ui: &mut Ui) {
         child.spacing_mut().item_spacing.x = 2.0;
         let has_doc = app.session.active().is_some();
         let dirty = app.session.active().is_some_and(|d| d.is_dirty());
+        if app.services.file_menu.is_some() {
+            child.menu_button("File", |ui| {
+                for (label, id) in [("New", "file.new"), ("Open…", "file.open"), ("Save locally", "file.save"), ("Save As locally…", "file.saveAs")]
+                {
+                    if ui.button(label).clicked() {
+                        let _ = app.run(id, json!({}));
+                        ui.close();
+                    }
+                }
+                if let Some(section) = &mut app.services.file_menu {
+                    section(ui, has_doc);
+                }
+            });
+        }
         if icon_toggle(&mut child, Icon::Home, "Home", true, app.home_open()).clicked() {
             let _ = app.run("app.home", json!({}));
         }
