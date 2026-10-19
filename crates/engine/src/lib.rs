@@ -335,6 +335,9 @@ pub struct Prefs {
     pub ac_entries: Vec<(String, String)>,
     /// Built-in entries you deleted.
     pub ac_removed: Vec<String>,
+    /// Active host account, independent of the editable display name. Never persisted.
+    #[serde(skip)]
+    pub user_id: Option<String>,
     pub author: String,
     pub undo_limit: usize,
     /// Minutes between AutoRecover saves of unsaved presentations.
@@ -358,6 +361,7 @@ impl Default for Prefs {
             ac_ordinals: true,
             ac_entries: Vec::new(),
             ac_removed: Vec::new(),
+            user_id: None,
             author: "Presenter".into(),
             undo_limit: 500,
             recovery_minutes: 1.0,

@@ -100,3 +100,11 @@ shaping for notes and footers; slide layout, rasterization, font selection, text
 links and outlines remain app-owned. PDF embedding and all Hayro production dependencies
 are disabled. Native builds enable parallel compression on the same pinned Krilla backend;
 WASM keeps it disabled. Generated-PDF assertions use a std-only parser as a development dependency.
+
+### Subnet host identity (19 October 2026)
+
+The browser cloud adapter supplies the authenticated account's opaque `user_id`
+and Subnet account display name through `Editor::set_user_profile`. The ID is runtime context only: it is
+cleared on logout/session changes and excluded from persisted preferences. Engine
+code has no ICP dependency, and opening someone else's file does not change the
+active user. The account name overrides local author-name preferences while signed in. This hook does not yet persist author IDs in comments or change author matching.

@@ -31,5 +31,5 @@ fn main() {
     eprintln!("deckcraft-web only runs in the browser: build it with `trunk build --release` in apps/deckcraft-web");
 }
 
-#[cfg(all(target_arch = "wasm32", feature = "icp-cloud"))]
+#[cfg(all(any(target_arch = "wasm32", test), feature = "icp-cloud"))]
 mod cloud;
